@@ -7,6 +7,17 @@ const { Client } = require('pg')
 const client = new Client(process.env.DATABASE_URL)
 client.connect()
 
+app.get("/api/v1/hello", async (req, res) => {
+    try {
+        // const results = await client.query("select * from test");
+         res.json("Hello")
+    } catch (err) {
+        console.error("error executing query:", err);
+        res.send(err)
+    }
+
+})
+
 app.get("/api/v1/get", async (req, res) => {
     try {
         const results = await client.query("select * from test");
