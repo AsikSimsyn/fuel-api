@@ -4,9 +4,10 @@ var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
 var jsonParser = bodyParser.json();
-const mysql = require('mysql')
+
+require('dotenv').config()
+const mysql = require('mysql2')
 const connection = mysql.createConnection(process.env.DATABASE_URL)
-connection.connect();
 console.log('Connected to PlanetScale!')
 // connection.end()
 
