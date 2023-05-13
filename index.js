@@ -12,7 +12,7 @@ app.get("/api/v1/hello", async (req, res) => {
         // const results = await client.query("select * from test");
          res.json("Hello")
     } catch (err) {
-        console.error("error executing query:", err);
+        // console.error("error executing query:", err);
         res.send(err)
     }
 
@@ -23,7 +23,7 @@ app.get("/api/v1/get", async (req, res) => {
         const results = await client.query("select * from test");
          res.send(results.rows)
     } catch (err) {
-        console.error("error executing query:", err);
+        // console.error("error executing query:", err);
         res.send(err)
     }
 
@@ -34,10 +34,10 @@ app.post("/api/v1/add", jsonParser, async (req, res)=> {
     const { name, age } = req.body;
     try {
         const results = await client.query("insert into test(name, age) values('" + name + "','" + age + "');");
-         res.send("added")
+        res.json("record added successfully")
          
     } catch (err) {
-        console.error("error executing query:", err);
+        // console.error("error executing query:", err);
         res.send(err)
     } 
    
