@@ -1,32 +1,35 @@
-var axios = require("axios");
 require('dotenv').config()
-var express = require("express");
-var app = express();
-var bodyParser = require("body-parser");
-var jsonParser = bodyParser.json();
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const jsonParser = bodyParser.json();
+const { Client } = require('pg')
+const client = new Client(process.env.DATABASE_URL)
+client.connect()
 
-require('dotenv').config()
-const mysql = require('mysql2')
-const connection = mysql.createConnection(process.env.DATABASE_URL)
-console.log('Connected to PlanetScale!')
-
-app.get("/api/v1/get", function(req, res){
-    const query = 'select * from fuel';
-    connection.query(query, (err, rows)=>{
-        if(err) throw err
-
-        return res.send(rows)
-    })
+app.get("/api/v1/get", async (req, res) => {
+    try {
+        const results = await client.query("select * from test");
+         res.send(results.rows)
+    } catch (err) {
+        console.error("error executing query:", err);
+        res.send(err)
+    }
 
 })
 
-app.post("/api/v1/add", jsonParser, function (req, res) {
-    const query = "insert into fuel(name, Age) values('" + req.body.name + "','" + req.body.Age + "');";
-    connection.query(query, (err, rows) => {
-        if (err) throw err
 
-        return res.send("record added")
-    })
+app.post("/api/v1/add", jsonParser, async (req, res)=> {
+    const { name, age } = req.body;
+    try {
+        const results = await client.query("insert into test(name, age) values('" + name + "','" + age + "');");
+         res.send("added")
+         
+    } catch (err) {
+        console.error("error executing query:", err);
+        res.send(err)
+    } 
+   
 });
 
 app.listen(3000, () => {
