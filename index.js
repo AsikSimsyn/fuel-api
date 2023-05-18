@@ -9,8 +9,9 @@ client.connect()
 
 app.get("/api/v1/hello", async (req, res) => {
     try {
+        console.log(req.params)
         // const results = await client.query("select * from test");
-         res.json("Hello")
+         res.json(req.params)
     } catch (err) {
         // console.error("error executing query:", err);
         res.send(err)
