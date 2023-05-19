@@ -7,15 +7,17 @@ const { Client } = require('pg')
 const client = new Client(process.env.DATABASE_URL)
 client.connect()
 
-app.get("/api/v1/hello", async (req, res) => {
+app.get("/api/v1/add", async (req, res) => {
+    const { name, age } = req.query;
+    console.log(req.query)
     try {
-        console.log(req.params)
-        // const results = await client.query("select * from test");
-         res.json(req.params)
+        const results = await client.query("insert into test(name, age) values('" + name + "','" + age + "');");
+        res.json("record added successfully")
+         
     } catch (err) {
-        // console.error("error executing query:", err);
+        console.error("error executing query:", err);
         res.send(err)
-    }
+    } 
 
 })
 
