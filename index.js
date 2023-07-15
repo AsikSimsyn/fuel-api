@@ -23,7 +23,7 @@ app.get("/api/v1/add", async (req, res) => {
     let date = d.toISOString().slice(0,10);
     console.log(date)
     try {
-        const results = await pool.query("insert into test(fuel_usage, date) values('" + usage + "','" + date + "');");
+        const results = await pool.query("insert into tbl_fuel_usage(fuel_usage, date) values('" + usage + "','" + date + "');");
         res.json("record added successfully")
 
     } catch (err) {
@@ -35,7 +35,7 @@ app.get("/api/v1/add", async (req, res) => {
 
 app.get("/api/v1/get", async (req, res) => {
     try {
-        const results = await pool.query("select * from test");
+        const results = await pool.query("select * from tbl_fuel_usage");
         res.send(results.rows)
     } catch (err) {
         // console.error("error executing query:", err);
