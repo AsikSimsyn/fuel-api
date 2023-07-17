@@ -57,8 +57,55 @@ app.get("/api/v1/login", async (req, res) => {
 
 app.get("/api/fuel/daily", async (req, res) => {
     try {
-        const results = await pool.query("SELECT TO_CHAR(date, 'Day') AS day_name, SUM(fuel_usage) AS fuel_usage FROM tbl_fuel_usage WHERE DATE(date) = CURRENT_DATE AND EXTRACT(month FROM date) = EXTRACT(month FROM CURRENT_DATE) GROUP BY day_name;");
-        res.send(results.rows)
+        const dayily = await pool.query(`
+    select
+        TO_CHAR(date,
+        'Day') as day_name,
+        SUM(fuel_usage) as fuel_usage
+    from
+        tbl_fuel_usage
+    where
+        DATE(date) = CURRENT_DATE
+        and extract(month
+    from
+        date) = extract(month
+    from
+        CURRENT_DATE)
+    group by
+        day_name;`);
+
+        const totalWeek = await pool.query(` 
+        select
+            SUM(fuel_usage) as total_usage
+        from
+            tbl_fuel_usage
+        where
+            date >= date_trunc('week',
+            CURRENT_DATE)::date
+            and date < date_trunc('week',
+            CURRENT_DATE)::date + interval '7 days';`);
+
+        const daysInWeek = await pool.query(`
+        SELECT
+            g.date AS date,
+            COALESCE(SUM(fu.fuel_usage), 0) AS total_usage,
+            TO_CHAR(g.date::date, 'Day') AS day
+            FROM
+            generate_series(
+                date_trunc('week', CURRENT_DATE)::date,
+                date_trunc('week', CURRENT_DATE)::date + INTERVAL '6 days',
+                '1 day'
+            ) AS g(date)
+            LEFT JOIN tbl_fuel_usage fu ON fu.date = g.date
+            GROUP BY g.date
+            ORDER BY g.date;
+        `);
+
+        let data = {}
+        data.daily= dayily.rows[0]
+        data.totalInWeek = totalWeek.rows[0]
+        data.daysInWeek = daysInWeek.rows
+        res.send(data)
     } catch (err) {
         // console.error("error executing query:", err);
         res.send(err)
@@ -80,6 +127,7 @@ app.get("/api/fuel/weekly", async (req, res) => {
 app.get("/api/fuel/monthly", async (req, res) => {
     try {
         const results = await pool.query("SELECT TO_CHAR(date, 'Month') AS month_name, SUM(fuel_usage) AS total_fuel_usage FROM tbl_fuel_usage GROUP BY month_name ORDER BY MIN(date);");
+
         res.send(results.rows)
     } catch (err) {
         // console.error("error executing query:", err);
