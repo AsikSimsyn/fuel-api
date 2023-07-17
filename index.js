@@ -44,6 +44,17 @@ app.get("/api/v1/get", async (req, res) => {
 
 })
 
+app.get("/api/v1/login", async (req, res) => {
+    try {
+        const results = await pool.query("select * from tbl_login where id=1");
+        res.send(results.rows)
+    } catch (err) {
+        // console.error("error executing query:", err);
+        res.send(err)
+    }
+
+})
+
 app.get("/api/fuel/daily", async (req, res) => {
     try {
         const results = await pool.query("SELECT TO_CHAR(date, 'Day') AS day_name, SUM(fuel_usage) AS fuel_usage FROM tbl_fuel_usage WHERE DATE(date) = CURRENT_DATE AND EXTRACT(month FROM date) = EXTRACT(month FROM CURRENT_DATE) GROUP BY day_name;");
