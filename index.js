@@ -75,30 +75,28 @@ app.get("/api/fuel/daily", async (req, res) => {
         day_name;`);
 
         const totalWeek = await pool.query(` 
-        select
-            SUM(fuel_usage) as total_usage
-        from
-            tbl_fuel_usage
-        where
-            date >= date_trunc('week',
-            CURRENT_DATE)::date
-            and date < date_trunc('week',
-            CURRENT_DATE)::date + interval '7 days';`);
+        SELECT
+    SUM(fuel_usage) AS total_usage
+FROM
+    tbl_fuel_usage
+WHERE
+    date >= CURRENT_DATE - INTERVAL '6 days'
+    AND date <= CURRENT_DATE;`);
 
         const daysInWeek = await pool.query(`
         SELECT
-            g.date AS date,
-            COALESCE(SUM(fu.fuel_usage), 0) AS total_usage,
-            TO_CHAR(g.date::date, 'Day') AS day
-            FROM
-            generate_series(
-                date_trunc('week', CURRENT_DATE)::date,
-                date_trunc('week', CURRENT_DATE)::date + INTERVAL '6 days',
-                '1 day'
-            ) AS g(date)
-            LEFT JOIN tbl_fuel_usage fu ON fu.date = g.date
-            GROUP BY g.date
-            ORDER BY g.date;
+        g.date AS date,
+        COALESCE(SUM(fu.fuel_usage), 0) AS total_usage,
+        TO_CHAR(g.date::date, 'Day') AS day
+      FROM
+        generate_series(
+          CURRENT_DATE - INTERVAL '6 days',
+          CURRENT_DATE,
+          '1 day'
+        ) AS g(date)
+      LEFT JOIN tbl_fuel_usage fu ON fu.date = g.date
+      GROUP BY g.date
+      ORDER BY g.date desc  
         `);
 
         let data = {}
