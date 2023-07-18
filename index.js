@@ -113,7 +113,15 @@ WHERE
 
 app.get("/api/fuel/weekly", async (req, res) => {
     try {
-        const results = await pool.query("SELECT DATE_TRUNC('week', date) AS week_start_date,EXTRACT(week FROM date) - EXTRACT(week FROM DATE_TRUNC('month', date)) + 1 AS week_in_month,SUM(fuel_usage) AS total_fuel_usage FROM tbl_fuel_usage WHERE EXTRACT(month FROM date) = EXTRACT(month FROM CURRENT_DATE) GROUP BY week_start_date, week_in_month ORDER BY week_start_date;");
+        const results = await pool.query(`
+SELECT 
+  date_trunc('week', date) AS week_start_date,
+  EXTRACT(WEEK FROM date) AS week_number,
+  SUM(fuel_usage) AS total_fuel_usage
+FROM tbl_fuel_usage
+WHERE date BETWEEN current_date - interval '4 weeks' AND current_date
+GROUP BY week_start_date, week_number
+ORDER BY week_start_date ASC;`);
         res.send(results.rows)
     } catch (err) {
         // console.error("error executing query:", err);
