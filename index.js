@@ -132,7 +132,15 @@ ORDER BY week_start_date ASC;`);
 
 app.get("/api/fuel/monthly", async (req, res) => {
     try {
-        const results = await pool.query("SELECT TO_CHAR(date, 'Month') AS month_name, SUM(fuel_usage) AS total_fuel_usage FROM tbl_fuel_usage GROUP BY month_name ORDER BY MIN(date);");
+        const results = await pool.query(`
+SELECT 
+  date_trunc('month', date) AS month_start_date,
+  EXTRACT(MONTH FROM date) AS month_number,
+  SUM(fuel_usage) AS total_fuel_usage
+FROM tbl_fuel_usage
+WHERE date >= current_date - interval '5 months'
+GROUP BY month_start_date, month_number
+ORDER BY month_start_date ASC;`);
 
         res.send(results.rows)
     } catch (err) {
